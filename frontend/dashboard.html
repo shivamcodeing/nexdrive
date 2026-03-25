@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>NexDrive — My Drive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root{
+      --bg:#0d0d14;--sb:#0a0a10;--surface:#13131f;--surface2:#1a1a2a;--surface3:#22223a;
+      --accent:#6c63ff;--accent2:#ff6b9d;--accent3:#00d4aa;
+      --text:#f0f0ff;--text2:#c0c0e0;--muted:#7070a0;--border:rgba(108,99,255,.15);
+      --sbw:248px;--th:58px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;overflow:hidden}
+    body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;display:flex;flex-direction:column}
+
+    /* TOPBAR */
+    .topbar{height:var(--th);display:flex;align-items:center;gap:10px;padding:0 14px;
+      border-bottom:1px solid var(--border);background:var(--sb);flex-shrink:0;position:relative;z-index:200}
+    .hamburger{width:36px;height:36px;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:5px;cursor:pointer;border-radius:9px;transition:background .2s;flex-shrink:0}
+    .hamburger:hover{background:var(--surface2)}
+    .hamburger span{display:block;width:19px;height:2px;background:var(--text2);border-radius:2px;transition:all .3s}
+    .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    .hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+    .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+    .logo-inline{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .logo-inline .lic{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+      border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff}
+    .logo-inline span{font-size:16px;font-weight:700}
+    .logo-inline span b{color:var(--accent)}
+    .search-wrap{flex:1;max-width:480px;position:relative;margin:0 6px}
+    .search-wrap i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px}
+    .search-wrap input{width:100%;padding:9px 9px 9px 34px;background:var(--surface2);
+      border:1px solid var(--border);border-radius:10px;color:var(--text);
+      font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:all .2s}
+    .search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.1)}
+    .tb-right{display:flex;align-items:center;gap:7px;margin-left:auto;flex-shrink:0}
+    .icon-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+      background:var(--surface2);border:1px solid var(--border);border-radius:9px;
+      color:var(--muted);cursor:pointer;font-size:13px;transition:all .2s}
+    .icon-btn:hover{color:var(--accent);border-color:var(--accent)}
+    .avatar{width:32px;height:32px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:13px;color:#fff;cursor:pointer;flex-shrink:0;
+      box-shadow:0 3px 10px rgba(108,99,255,.3)}
+
+    /* LAYOUT */
+    .layout{display:flex;flex:1;overflow:hidden;position:relative}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sbw);background:var(--sb);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;height:100%;overflow-y:auto;flex-shrink:0;
+      transition:transform .28s ease}
+    .sb-inner{padding:12px 0;height:100%;display:flex;flex-direction:column}
+    .up-btn{margin:0 12px 14px;padding:10px 16px;
+      background:linear-gradient(135deg,var(--accent),#8b7cff);border:none;border-radius:10px;
+      color:#fff;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;
+      display:flex;align-items:center;gap:8px;
+      box-shadow:0 5px 15px rgba(108,99,255,.3);transition:all .2s}
+    .up-btn:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(108,99,255,.4)}
+    .nav-sec{padding:0 8px;margin-bottom:4px}
+    .nav-lbl{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1.5px;
+      text-transform:uppercase;padding:3px 10px 6px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+      cursor:pointer;font-size:13px;color:var(--text2);font-weight:500;
+      transition:all .2s;margin-bottom:1px;border:1px solid transparent}
+    .nav-item:hover{background:var(--surface2);color:var(--text)}
+    .nav-item.active{background:rgba(108,99,255,.12);color:var(--accent);border-color:rgba(108,99,255,.2)}
+    .nav-item i{width:15px;text-align:center;font-size:13px;flex-shrink:0}
+    .cnt{margin-left:auto;font-size:10px;background:var(--surface3);padding:2px 6px;border-radius:20px;color:var(--muted)}
+    .nav-item.active .cnt{background:rgba(108,99,255,.2);color:var(--accent)}
+    .storage-card{margin:auto 12px 12px;padding:13px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+    .stitle{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+    .sbar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:7px}
+    .sfill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s}
+    .stext{font-size:11px;color:var(--muted)}
+    .stext b{color:var(--text2)}
+    .no-limit-badge{font-size:10px;color:var(--accent3);margin-top:5px;display:flex;align-items:center;gap:4px}
+
+    /* Mobile overlay */
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:149;backdrop-filter:blur(2px)}
+    .sb-overlay.show{display:block}
+
+    /* MAIN */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+    /* CONTENT VIEW */
+    .content{flex:1;overflow-y:auto;padding:16px 16px}
+    .c-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px;flex-wrap:wrap}
+    .c-header h2{font-size:17px;font-weight:700}
+    .view-ctl{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .sort-sel{padding:6px 9px;background:var(--surface);border:1px solid var(--border);
+      border-radius:8px;color:var(--text2);font-family:'Sora',sans-serif;font-size:12px;outline:none;cursor:pointer}
+    .vbtn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+      border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--muted);
+      font-size:12px;transition:all .2s;background:transparent}
+    .vbtn:hover,.vbtn.active{border-color:var(--accent);color:var(--accent);background:rgba(108,99,255,.08)}
+
+    /* GRID */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:11px}
+    .fcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+      overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+    .fcard:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 20px rgba(108,99,255,.13)}
+    .fpreview{height:108px;display:flex;align-items:center;justify-content:center;
+      background:var(--surface2);overflow:hidden}
+    .fpreview img{width:100%;height:100%;object-fit:cover}
+    .fpreview video{width:100%;height:100%;object-fit:cover}
+    .ficon{font-size:36px}
+    .ficon.image{color:#4fc3f7}.ficon.video{color:#ff6b9d}.ficon.audio{color:#a5d6a7}
+    .ficon.pdf{color:#ef9a9a}.ficon.doc{color:#64b5f6}.ficon.sheet{color:#81c784}
+    .ficon.ppt{color:#ffb74d}.ficon.text{color:#b0bec5}.ficon.other{color:var(--muted)}
+    .finfo{padding:10px}
+    .fname{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+    .fmeta{font-size:10px;color:var(--muted)}
+    .factions{position:absolute;top:6px;right:6px;display:flex;gap:3px;opacity:0;transition:opacity .2s}
+    .fcard:hover .factions{opacity:1}
+    @media(hover:none){.factions{opacity:1}}
+    .fab{width:25px;height:25px;border-radius:6px;border:none;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
+    .fab-del{background:rgba(255,70,70,.85);color:#fff}.fab-del:hover{background:#ff4444}
+    .fab-down{background:rgba(108,99,255,.85);color:#fff}.fab-down:hover{background:var(--accent)}
+    .fab-restore{background:rgba(0,212,170,.85);color:#fff}
+
+    /* LIST */
+    .list-view{display:none}
+    .list-header{display:grid;grid-template-columns:2fr .75fr .75fr 85px;gap:8px;padding:8px 10px;
+      font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;
+      letter-spacing:.5px;border-bottom:1px solid var(--border)}
+    .list-item{display:grid;grid-template-columns:2fr .75fr .75fr 85px;gap:8px;padding:10px 10px;
+      align-items:center;border-bottom:1px solid rgba(108,99,255,.05);cursor:pointer;
+      transition:background .15s;border-radius:7px}
+    .list-item:hover{background:var(--surface)}
+    .li-name{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;min-width:0}
+    .li-name span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .li-ic{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+    .li-col{font-size:11px;color:var(--muted)}
+    .li-actions{display:flex;gap:4px}
+
+    /* EMPTY */
+    .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
+    .empty .eic{font-size:54px;color:var(--surface3);margin-bottom:14px}
+    .empty h3{font-size:16px;color:var(--text2);margin-bottom:5px}
+    .empty p{font-size:13px;color:var(--muted)}
+    .up-empty-btn{margin-top:16px;padding:10px 22px;background:linear-gradient(135deg,var(--accent),#8b7cff);
+      border:none;border-radius:10px;color:#fff;font-family:'Sora',sans-serif;
+      font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px}
+
+    /* PAGE VIEWS (profile/settings) */
+    .page-view{display:none;flex:1;overflow-y:auto;padding:18px 16px;flex-direction:column}
+    .page-view.active{display:flex}
+    .page-title{font-size:18px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:9px;flex-shrink:0}
+    .page-title i{color:var(--accent)}
+    .cs{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:18px;margin-bottom:14px;flex-shrink:0}
+    .cs h3{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:14px;
+      text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:7px}
+    .cs h3 i{color:var(--accent)}
+    .prof-row{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+    .big-av{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;color:#fff;
+      box-shadow:0 5px 18px rgba(108,99,255,.3);flex-shrink:0}
+    .av-info h4{font-size:15px;font-weight:700}
+    .av-info p{font-size:12px;color:var(--muted);margin-top:2px}
+    .av-info .joined{font-size:11px;color:var(--muted);margin-top:3px}
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+    .stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:12px;text-align:center}
+    .sv{font-size:20px;font-weight:700;color:var(--accent);margin-bottom:3px}
+    .sl{font-size:11px;color:var(--muted)}
+    .fg{margin-bottom:13px}
+    .fg label{display:block;font-size:10px;font-weight:600;color:var(--muted);
+      margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase}
+    .fg input{width:100%;padding:10px 13px;background:var(--surface2);
+      border:1px solid var(--border);border-radius:9px;color:var(--text);
+      font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:all .2s}
+    .fg input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.1)}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+    @media(max-width:500px){.row2{grid-template-columns:1fr}}
+    .btn-save{padding:10px 20px;background:linear-gradient(135deg,var(--accent),#8b7cff);
+      border:none;border-radius:9px;color:#fff;font-family:'Sora',sans-serif;
+      font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
+      display:inline-flex;align-items:center;gap:7px}
+    .btn-save:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(108,99,255,.35)}
+    .btn-save:disabled{opacity:.7;cursor:not-allowed;transform:none}
+    .btn-danger{padding:10px 20px;background:rgba(255,70,70,.1);border:1px solid rgba(255,70,70,.3);
+      border-radius:9px;color:#ff6b6b;font-family:'Sora',sans-serif;font-size:13px;
+      font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+    .btn-danger:hover{background:rgba(255,70,70,.2)}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;
+      padding:11px 0;border-bottom:1px solid rgba(108,99,255,.08)}
+    .toggle-row:last-child{border-bottom:none;padding-bottom:0}
+    .toggle-info h4{font-size:13px;font-weight:600;margin-bottom:2px}
+    .toggle-info p{font-size:11px;color:var(--muted)}
+    .tog{width:40px;height:22px;background:var(--surface3);border-radius:11px;
+      cursor:pointer;position:relative;transition:background .25s;flex-shrink:0}
+    .tog.on{background:var(--accent)}
+    .tog::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;
+      background:#fff;top:3px;left:3px;transition:transform .25s}
+    .tog.on::after{transform:translateX(18px)}
+    .ail{padding:10px 13px;border-radius:8px;margin-bottom:12px;font-size:13px;
+      display:none;align-items:center;gap:7px}
+    .ail.error{background:rgba(255,70,70,.1);border:1px solid rgba(255,70,70,.3);color:#ff6b6b}
+    .ail.success{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);color:var(--accent3)}
+    .ail.show{display:flex}
+    .spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+      border-radius:50%;animation:sp .8s linear infinite;display:none}
+    .spin.show{display:inline-block}
+    @keyframes sp{to{transform:rotate(360deg)}}
+
+    /* DROP OVERLAY */
+    .drop-ov{position:fixed;inset:0;background:rgba(108,99,255,.12);
+      border:3px dashed var(--accent);border-radius:20px;z-index:1000;
+      display:none;align-items:center;justify-content:center;flex-direction:column;
+      gap:14px;backdrop-filter:blur(4px)}
+    .drop-ov.active{display:flex}
+    .drop-ov .di{font-size:54px;color:var(--accent);animation:bnc .8s ease infinite alternate}
+    @keyframes bnc{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+
+    /* MODAL */
+    .modal-ov{position:fixed;inset:0;background:rgba(5,5,10,.92);z-index:2000;
+      display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);padding:10px}
+    .modal-ov.active{display:flex}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:15px;
+      max-width:800px;width:100%;max-height:90vh;overflow:hidden;
+      display:flex;flex-direction:column;box-shadow:0 30px 70px rgba(0,0,0,.7)}
+    .modal-hdr{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+    .mfname{font-weight:600;font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .modal-close{width:28px;height:28px;border-radius:7px;background:var(--surface2);
+      border:1px solid var(--border);color:var(--text);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:13px}
+    .modal-body{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:18px;background:var(--bg)}
+    .modal-body img{max-width:100%;max-height:55vh;border-radius:6px;object-fit:contain}
+    .modal-body video,.modal-body audio{width:100%;border-radius:7px}
+    .modal-body audio{max-width:320px}
+    .modal-ftr{padding:11px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px}
+    .modal-meta{font-size:11px;color:var(--muted);flex:1}
+    .btn-dl{padding:8px 15px;background:var(--accent);border:none;border-radius:8px;
+      color:#fff;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;
+      cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none}
+
+    /* USER DROPDOWN */
+    .udrop{position:fixed;top:64px;right:12px;background:var(--surface);
+      border:1px solid var(--border);border-radius:12px;padding:7px;
+      min-width:190px;z-index:500;display:none;box-shadow:0 14px 36px rgba(0,0,0,.5)}
+    .udrop.show{display:block}
+    .ud-user{padding:9px 11px 12px;border-bottom:1px solid var(--border);margin-bottom:4px}
+    .ud-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;margin-bottom:7px}
+    .ud-name{font-size:13px;font-weight:600}
+    .ud-email{font-size:11px;color:var(--muted)}
+    .dd-item{padding:8px 11px;border-radius:8px;cursor:pointer;font-size:13px;
+      color:var(--text2);display:flex;align-items:center;gap:8px;transition:background .15s}
+    .dd-item:hover{background:var(--surface2)}
+    .dd-item.danger{color:#ff6b6b}
+
+    /* TOAST */
+    .toasts{position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:6px}
+    .toast{padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;
+      display:flex;align-items:center;gap:8px;box-shadow:0 8px 22px rgba(0,0,0,.4);
+      animation:tin .3s ease;min-width:220px;max-width:88vw}
+    .toast.success{background:rgba(0,212,170,.15);border:1px solid rgba(0,212,170,.3);color:var(--accent3)}
+    .toast.error{background:rgba(255,70,70,.15);border:1px solid rgba(255,70,70,.3);color:#ff6b6b}
+    .toast.info{background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);color:var(--accent)}
+    @keyframes tin{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+
+    /* UPLOAD PROGRESS */
+    .uprog{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+      background:var(--surface);border:1px solid var(--border);border-radius:12px;
+      padding:13px 17px;min-width:250px;max-width:88vw;z-index:5000;
+      box-shadow:0 16px 40px rgba(0,0,0,.5);display:none}
+    .uprog.show{display:block}
+    .up-t{font-size:13px;font-weight:600;margin-bottom:8px}
+    .up-bar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+    .up-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:3px;transition:width .3s}
+    .up-txt{font-size:10px;color:var(--muted);margin-top:4px}
+
+    ::-webkit-scrollbar{width:4px;height:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+
+    /* RESPONSIVE */
+    @media(max-width:768px){
+      .sidebar{position:fixed;left:0;top:var(--th);height:calc(100vh - var(--th));
+        z-index:150;transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .hide-mob{display:none}
+    }
+    @media(min-width:769px){
+      .hamburger{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="drop-ov" id="dropOv">
+  <div class="di"><i class="fas fa-cloud-upload-alt"></i></div>
+  <h2 style="color:var(--accent)">Drop files to upload</h2>
+  <p style="color:var(--muted);font-size:13px">Release to start uploading</p>
+</div>
+
+<div class="modal-ov" id="modalOv">
+  <div class="modal">
+    <div class="modal-hdr">
+      <i id="mIcon" class="fas fa-file" style="font-size:15px;color:var(--accent)"></i>
+      <span class="mfname" id="mName">File</span>
+      <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+    <div class="modal-ftr">
+      <div class="modal-meta" id="mMeta"></div>
+      <a id="dlLink" href="#" download><button class="btn-dl"><i class="fas fa-download"></i> Download</button></a>
+    </div>
+  </div>
+</div>
+
+<div class="uprog" id="uprog">
+  <div class="up-t"><i class="fas fa-cloud-upload-alt" style="color:var(--accent)"></i> Uploading...</div>
+  <div class="up-bar"><div class="up-fill" id="upFill" style="width:0%"></div></div>
+  <div class="up-txt" id="upTxt">Preparing...</div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<input type="file" id="fileInput" multiple style="display:none" onchange="uploadFiles(this.files)"/>
+<div class="sb-overlay" id="sbOv" onclick="closeSb()"></div>
+
+<div class="udrop" id="udrop">
+  <div class="ud-user">
+    <div class="ud-av" id="udAv">U</div>
+    <div class="ud-name" id="udName">User</div>
+    <div class="ud-email" id="udEmail">email</div>
+  </div>
+  <div class="dd-item" onclick="showPage('profile')"><i class="fas fa-user"></i> My Profile</div>
+  <div class="dd-item" onclick="showPage('settings')"><i class="fas fa-cog"></i> Settings</div>
+  <div class="dd-item danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</div>
+</div>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="hamburger" id="hbg" onclick="toggleSb()">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="logo-inline">
+    <div class="lic"><i class="fas fa-cloud"></i></div>
+    <span>Nex<b>Drive</b></span>
+  </div>
+  <div class="search-wrap">
+    <i class="fas fa-search"></i>
+    <input type="text" placeholder="Search files..." id="searchInput" oninput="handleSearch()"/>
+  </div>
+  <div class="tb-right">
+    <div class="icon-btn hide-mob" title="Refresh" onclick="loadFiles()"><i class="fas fa-rotate-right"></i></div>
+    <div class="icon-btn" title="Upload" onclick="document.getElementById('fileInput').click()"><i class="fas fa-upload"></i></div>
+    <div class="avatar" id="avBtn" onclick="toggleDrop()">U</div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-inner">
+      <button class="up-btn" onclick="document.getElementById('fileInput').click();closeSb()">
+        <i class="fas fa-plus"></i> Upload Files
+      </button>
+      <div class="nav-sec">
+        <div class="nav-lbl">Drive</div>
+        <div class="nav-item active" onclick="navTo('drive',this)"><i class="fas fa-hard-drive"></i> My Drive <span class="cnt" id="dCnt">0</span></div>
+        <div class="nav-item" onclick="navTo('recent',this)"><i class="fas fa-clock"></i> Recent</div>
+        <div class="nav-item" onclick="navTo('images',this)"><i class="fas fa-images"></i> Images</div>
+        <div class="nav-item" onclick="navTo('videos',this)"><i class="fas fa-video"></i> Videos</div>
+        <div class="nav-item" onclick="navTo('audio',this)"><i class="fas fa-music"></i> Audio</div>
+        <div class="nav-item" onclick="navTo('docs',this)"><i class="fas fa-file-alt"></i> Documents</div>
+      </div>
+      <div class="nav-sec">
+        <div class="nav-lbl">Other</div>
+        <div class="nav-item" onclick="navTo('trash',this)"><i class="fas fa-trash"></i> Trash <span class="cnt" id="tCnt">0</span></div>
+        <div class="nav-item" onclick="showPage('profile')"><i class="fas fa-user"></i> Profile</div>
+        <div class="nav-item" onclick="showPage('settings')"><i class="fas fa-cog"></i> Settings</div>
+      </div>
+      <div class="storage-card">
+        <div class="stitle"><i class="fas fa-database" style="color:var(--accent);margin-right:4px"></i> Storage</div>
+        <div class="sbar"><div class="sfill" id="sfill" style="width:2%"></div></div>
+        <div class="stext" id="stext">0 B used</div>
+        <div class="no-limit-badge"><i class="fas fa-infinity"></i> No upload limit</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainArea">
+
+    <!-- DRIVE -->
+    <div class="content" id="driveContent">
+      <div class="c-header">
+        <h2 id="pageTitle">My Drive</h2>
+        <div class="view-ctl">
+          <select class="sort-sel" onchange="sortFiles(this.value)" id="sortSel">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="name">Name A–Z</option>
+            <option value="size">Largest</option>
+          </select>
+          <button class="vbtn active" id="gBtn" onclick="setView('grid')"><i class="fas fa-grip"></i></button>
+          <button class="vbtn" id="lBtn" onclick="setView('list')"><i class="fas fa-list"></i></button>
+        </div>
+      </div>
+      <div class="grid" id="filesGrid"></div>
+      <div class="list-view" id="listView">
+        <div class="list-header"><span>Name</span><span>Size</span><span>Date</span><span>Actions</span></div>
+        <div id="listBody"></div>
+      </div>
+      <div class="empty" id="emptyState" style="display:none">
+        <div class="eic"><i class="fas fa-folder-open"></i></div>
+        <h3 id="emptyTitle">No files here</h3>
+        <p id="emptyDesc">Upload to get started</p>
+        <button class="up-empty-btn" onclick="document.getElementById('fileInput').click()">
+          <i class="fas fa-upload"></i> Upload Files
+        </button>
+      </div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div class="page-view" id="profilePage">
+      <div class="page-title"><i class="fas fa-user-circle"></i> My Profile</div>
+      <div class="cs">
+        <div class="prof-row">
+          <div class="big-av" id="bigAv">U</div>
+          <div class="av-info">
+            <h4 id="profName">Loading...</h4>
+            <p id="profEmail">loading...</p>
+            <span class="joined" id="profJoined"></span>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="sv" id="stFiles">0</div><div class="sl">Total Files</div></div>
+          <div class="stat-card"><div class="sv" id="stSize">0 B</div><div class="sl">Storage Used</div></div>
+          <div class="stat-card"><div class="sv" id="stImg">0</div><div class="sl">Images</div></div>
+          <div class="stat-card"><div class="sv" id="stVid">0</div><div class="sl">Videos</div></div>
+          <div class="stat-card"><div class="sv" id="stAud">0</div><div class="sl">Audio</div></div>
+          <div class="stat-card"><div class="sv" id="stDoc">0</div><div class="sl">Docs</div></div>
+        </div>
+      </div>
+
+      <div class="cs">
+        <h3><i class="fas fa-edit"></i> Edit Profile</h3>
+        <div class="ail" id="profAil"></div>
+        <div class="row2">
+          <div class="fg"><label>Full Name</label><input type="text" id="editName" placeholder="Your name"/></div>
+          <div class="fg"><label>Email</label><input type="email" id="editEmail" placeholder="email@example.com"/></div>
+        </div>
+        <button class="btn-save" id="saveProfBtn" onclick="saveProfile()">
+          Save Changes <div class="spin" id="profSpin"></div>
+        </button>
+      </div>
+
+      <div class="cs">
+        <h3><i class="fas fa-lock"></i> Change Password</h3>
+        <div class="ail" id="pwAil"></div>
+        <div class="fg"><label>Current Password</label><input type="password" id="curPw" placeholder="Current password"/></div>
+        <div class="row2">
+          <div class="fg"><label>New Password</label><input type="password" id="newPw" placeholder="Min 6 chars"/></div>
+          <div class="fg"><label>Confirm New</label><input type="password" id="confPw" placeholder="Repeat new"/></div>
+        </div>
+        <button class="btn-save" id="savePwBtn" onclick="changePassword()">
+          Update Password <div class="spin" id="pwSpin"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page-view" id="settingsPage">
+      <div class="page-title"><i class="fas fa-cog"></i> Settings</div>
+
+      <div class="cs">
+        <h3><i class="fas fa-palette"></i> Appearance</h3>
+        <div class="toggle-row">
+          <div class="toggle-info"><h4>Dark Mode</h4><p>Dark background theme (currently active)</p></div>
+          <div class="tog on"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><h4>Compact Grid</h4><p>Smaller file cards in grid view</p></div>
+          <div class="tog" id="compactTog" onclick="toggleCompact(this)"></div>
+        </div>
+      </div>
+
+      <div class="cs">
+        <h3><i class="fas fa-upload"></i> Upload</h3>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>No File Size Limit</h4>
+            <p style="color:var(--accent3)">✓ Unlimited file size — upload anything!</p>
+          </div>
+          <div class="tog on" style="pointer-events:none;opacity:.6"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><h4>Drag & Drop</h4><p>Drop files anywhere on page</p></div>
+          <div class="tog on"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><h4>Image Thumbnails</h4><p>Preview images in grid view</p></div>
+          <div class="tog on"></div>
+        </div>
+      </div>
+
+      <div class="cs">
+        <h3><i class="fas fa-bell"></i> Notifications</h3>
+        <div class="toggle-row">
+          <div class="toggle-info"><h4>Upload Toast</h4><p>Notification after upload</p></div>
+          <div class="tog on"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><h4>Delete Confirmation</h4><p>Confirm before trash</p></div>
+          <div class="tog on" id="confirmTog"></div>
+        </div>
+      </div>
+
+      <div class="cs">
+        <h3><i class="fas fa-database"></i> Storage Info</h3>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.8">
+          <div><i class="fas fa-folder" style="color:var(--accent);width:18px"></i>
+            Files: <code style="background:var(--surface2);padding:2px 7px;border-radius:5px;font-size:11px">backend/uploads/</code></div>
+          <div><i class="fas fa-database" style="color:var(--accent);width:18px"></i>
+            Database: <code style="background:var(--surface2);padding:2px 7px;border-radius:5px;font-size:11px">backend/data/</code></div>
+        </div>
+        <div class="sbar" style="margin-bottom:7px"><div class="sfill" id="sSfill" style="width:2%"></div></div>
+        <div style="font-size:12px;color:var(--muted)" id="sStext">Loading...</div>
+      </div>
+
+      <div class="cs">
+        <h3><i class="fas fa-exclamation-triangle" style="color:#ff6b6b"></i> Danger Zone</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:13px">Permanent actions — cannot be undone.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-danger" onclick="emptyTrash()"><i class="fas fa-trash-alt"></i> Empty Trash</button>
+          <button class="btn-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000/api'
+    : '/api'; // Auto-detect: uses relative URL on Render
+let curView='grid',curSec='drive',allFiles=[];
+const token=localStorage.getItem('token');
+const usr=JSON.parse(localStorage.getItem('user')||'{}');
+if(!token)location.href='login.html';
+
+const ini=(usr.name||'U')[0].toUpperCase();
+['avBtn','udAv','bigAv'].forEach(id=>document.getElementById(id).textContent=ini);
+document.getElementById('udName').textContent=usr.name||'User';
+document.getElementById('udEmail').textContent=usr.email||'';
+
+// SIDEBAR
+function toggleSb(){const sb=document.getElementById('sidebar'),hb=document.getElementById('hbg'),ov=document.getElementById('sbOv');const o=sb.classList.toggle('open');hb.classList.toggle('open',o);ov.classList.toggle('show',o)}
+function closeSb(){document.getElementById('sidebar').classList.remove('open');document.getElementById('hbg').classList.remove('open');document.getElementById('sbOv').classList.remove('show')}
+
+// PAGES
+function showPage(p){
+  document.getElementById('driveContent').style.display='none';
+  document.getElementById('profilePage').classList.remove('active');
+  document.getElementById('settingsPage').classList.remove('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(p==='profile'){document.getElementById('profilePage').classList.add('active');loadProfData();}
+  else if(p==='settings'){document.getElementById('settingsPage').classList.add('active');loadSettData();}
+  document.getElementById('udrop').classList.remove('show');
+  closeSb();
+}
+
+function navTo(sec,el){
+  curSec=sec;
+  document.getElementById('driveContent').style.display='block';
+  document.getElementById('profilePage').classList.remove('active');
+  document.getElementById('settingsPage').classList.remove('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  const t={drive:'My Drive',recent:'Recent',images:'Images',videos:'Videos',audio:'Audio',docs:'Documents',trash:'Trash'};
+  document.getElementById('pageTitle').textContent=t[sec]||'My Drive';
+  closeSb();loadFiles();
+}
+
+// LOAD FILES
+async function loadFiles(){
+  const grid=document.getElementById('filesGrid');
+  grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--muted)">
+    <i class="fas fa-spinner fa-spin" style="font-size:22px;margin-bottom:10px;display:block"></i>Loading...</div>`;
+  try{
+    const p=new URLSearchParams();
+    if(curSec==='trash')p.set('trash','true');
+    const s=document.getElementById('searchInput').value.trim();
+    if(s)p.set('search',s);
+    const res=await fetch(`${API}/files?${p}`,{headers:{'Authorization':`Bearer ${token}`}});
+    if(res.status===401){logout();return;}
+    const d=await res.json();
+    if(!d.success)throw new Error(d.message);
+    let files=d.files||[];
+    const cm={images:'image',videos:'video',audio:'audio',docs:'doc'};
+    if(cm[curSec])files=files.filter(f=>f.category===cm[curSec]);
+    if(curSec==='recent')files=files.slice(0,40);
+    allFiles=files;
+    sortArr(document.getElementById('sortSel').value);
+    renderFiles(allFiles);
+    updStorage(d.totalStorage||0);
+    document.getElementById('dCnt').textContent=d.count||0;
+    loadTCnt();
+  }catch(err){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:50px;color:#ff6b6b">
+      <i class="fas fa-exclamation-triangle" style="font-size:22px;margin-bottom:10px;display:block"></i>
+      ${err.message||'Cannot connect to server'}<br><small style="color:var(--muted)">Make sure backend is running: npm start</small></div>`;
+  }
+}
+
+async function loadTCnt(){try{const r=await fetch(`${API}/files?trash=true`,{headers:{'Authorization':`Bearer ${token}`}});const d=await r.json();document.getElementById('tCnt').textContent=d.count||0;}catch{}}
+
+// RENDER
+function renderFiles(files){
+  const grid=document.getElementById('filesGrid'),lb=document.getElementById('listBody'),em=document.getElementById('emptyState');
+  const isT=curSec==='trash';
+  if(!files.length){grid.innerHTML='';lb.innerHTML='';em.style.display='flex';
+    document.getElementById('emptyTitle').textContent=isT?'Trash is empty':'No files here';
+    document.getElementById('emptyDesc').textContent=isT?'Deleted files appear here':'Drag & drop or click Upload';
+    return;}
+  em.style.display='none';
+  grid.innerHTML=files.map(f=>`
+    <div class="fcard" onclick="openPrev('${f._id}')">
+      <div class="fpreview">${prvHTML(f)}</div>
+      <div class="factions">
+        <button class="fab fab-down" onclick="event.stopPropagation();dlFile('${f.url}','${esc(f.originalName)}')"><i class="fas fa-download"></i></button>
+        <button class="fab fab-del" onclick="event.stopPropagation();delFile('${f._id}')"><i class="fas fa-trash"></i></button>
+        ${isT?`<button class="fab fab-restore" onclick="event.stopPropagation();restFile('${f._id}')"><i class="fas fa-undo"></i></button>`:''}
+      </div>
+      <div class="finfo">
+        <div class="fname" title="${esc(f.originalName)}">${esc(f.originalName)}</div>
+        <div class="fmeta">${fmtSz(f.size)} · ${tAgo(f.uploadedAt)}</div>
+      </div>
+    </div>`).join('');
+  lb.innerHTML=files.map(f=>`
+    <div class="list-item" onclick="openPrev('${f._id}')">
+      <div class="li-name"><div class="li-ic" style="background:${iBg(f.category)}20;color:${iBg(f.category)}"><i class="${iCls(f.category)}"></i></div><span title="${esc(f.originalName)}">${esc(f.originalName)}</span></div>
+      <div class="li-col">${fmtSz(f.size)}</div>
+      <div class="li-col">${new Date(f.uploadedAt).toLocaleDateString()}</div>
+      <div class="li-actions" onclick="event.stopPropagation()">
+        <button class="fab fab-down" onclick="dlFile('${f.url}','${esc(f.originalName)}')"><i class="fas fa-download"></i></button>
+        <button class="fab fab-del" onclick="delFile('${f._id}')"><i class="fas fa-trash"></i></button>
+        ${isT?`<button class="fab fab-restore" onclick="restFile('${f._id}')"><i class="fas fa-undo"></i></button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function prvHTML(f){
+  if(f.category==='image')return`<img src="${f.url}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image ficon image\\'></i>'"/>`;
+  if(f.category==='video')return`<video src="${f.url}" muted preload="metadata"></video>`;
+  const m={audio:'fa-music audio',pdf:'fa-file-pdf pdf',doc:'fa-file-word doc',sheet:'fa-file-excel sheet',ppt:'fa-file-powerpoint ppt',text:'fa-file-alt text',other:'fa-file other'};
+  return`<i class="fas ${m[f.category]||m.other} ficon"></i>`;
+}
+function iCls(c){const m={image:'fa-image',video:'fa-video',audio:'fa-music',pdf:'fa-file-pdf',doc:'fa-file-word',sheet:'fa-file-excel',ppt:'fa-file-powerpoint',text:'fa-file-alt',other:'fa-file'};return'fas '+(m[c]||'fa-file')}
+function iBg(c){const m={image:'#4fc3f7',video:'#ff6b9d',audio:'#a5d6a7',pdf:'#ef9a9a',doc:'#64b5f6',sheet:'#81c784',ppt:'#ffb74d',text:'#b0bec5',other:'#9090b0'};return m[c]||'#9090b0'}
+
+// PREVIEW
+function openPrev(id){
+  const f=allFiles.find(x=>x._id===id);if(!f)return;
+  document.getElementById('mName').textContent=f.originalName;
+  document.getElementById('mMeta').textContent=`${fmtSz(f.size)} · ${f.mimetype} · ${new Date(f.uploadedAt).toLocaleDateString()}`;
+  document.getElementById('dlLink').href=f.url;document.getElementById('dlLink').download=f.originalName;
+  const b=document.getElementById('mBody');
+  if(f.category==='image')b.innerHTML=`<img src="${f.url}"/>`;
+  else if(f.category==='video')b.innerHTML=`<video src="${f.url}" controls autoplay style="max-height:54vh"></video>`;
+  else if(f.category==='audio')b.innerHTML=`<div style="text-align:center"><i class="fas fa-music" style="font-size:65px;color:var(--accent3);margin-bottom:16px;display:block"></i><audio src="${f.url}" controls autoplay></audio><p style="color:var(--muted);margin-top:11px;font-size:12px">${esc(f.originalName)}</p></div>`;
+  else if(f.category==='pdf')b.innerHTML=`<iframe src="${f.url}" style="width:100%;height:54vh;border:none;border-radius:6px"></iframe>`;
+  else b.innerHTML=`<div style="text-align:center;padding:32px"><i class="${iCls(f.category)}" style="font-size:64px;color:var(--muted);margin-bottom:14px;display:block"></i><p style="color:var(--text2);font-size:14px;font-weight:600">${esc(f.originalName)}</p><p style="color:var(--muted);font-size:12px;margin-top:6px">No preview. Click Download to open.</p></div>`;
+  document.getElementById('modalOv').classList.add('active');
+}
+function closeModal(){document.getElementById('modalOv').classList.remove('active');document.getElementById('mBody').innerHTML=''}
+document.getElementById('modalOv').addEventListener('click',function(e){if(e.target===this)closeModal()});
+
+// UPLOAD (no size limit)
+async function uploadFiles(files){
+  if(!files||!files.length)return;
+  const prog=document.getElementById('uprog'),fill=document.getElementById('upFill'),txt=document.getElementById('upTxt');
+  prog.classList.add('show');fill.style.width='10%';txt.textContent=`Uploading ${files.length} file(s)...`;
+  const form=new FormData();
+  for(const f of files)form.append('files',f);
+  try{
+    fill.style.width='50%';
+    const res=await fetch(`${API}/files/upload`,{method:'POST',headers:{'Authorization':`Bearer ${token}`},body:form});
+    fill.style.width='90%';
+    const d=await res.json();
+    fill.style.width='100%';txt.textContent='Done!';
+    setTimeout(()=>{prog.classList.remove('show');fill.style.width='0%'},1400);
+    if(d.success){showToast(`${d.files.length} file(s) uploaded!`,'success');document.getElementById('fileInput').value='';loadFiles();}
+    else showToast(d.message||'Upload failed','error');
+  }catch{prog.classList.remove('show');showToast('Upload failed. Is backend running?','error');}
+}
+
+// DELETE / RESTORE
+async function delFile(id){
+  const cOn=document.getElementById('confirmTog')?.classList.contains('on');
+  const msg=curSec==='trash'?'Permanently delete?':'Move to trash?';
+  if(cOn&&!confirm(msg))return;
+  try{const res=await fetch(`${API}/files/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});const d=await res.json();if(d.success){showToast(d.message,'success');loadFiles();}else showToast(d.message||'Failed','error');}
+  catch{showToast('Delete failed','error');}
+}
+async function restFile(id){
+  try{const res=await fetch(`${API}/files/${id}/restore`,{method:'PATCH',headers:{'Authorization':`Bearer ${token}`}});const d=await res.json();if(d.success){showToast('File restored!','success');loadFiles();}}
+  catch{showToast('Restore failed','error');}
+}
+function dlFile(url,name){const a=document.createElement('a');a.href=url;a.download=name;a.target='_blank';document.body.appendChild(a);a.click();document.body.removeChild(a);}
+
+// SEARCH / SORT / VIEW
+let st;
+function handleSearch(){clearTimeout(st);st=setTimeout(loadFiles,400)}
+function sortFiles(v){sortArr(v);renderFiles(allFiles)}
+function sortArr(v){allFiles.sort((a,b)=>{if(v==='newest')return new Date(b.uploadedAt)-new Date(a.uploadedAt);if(v==='oldest')return new Date(a.uploadedAt)-new Date(b.uploadedAt);if(v==='name')return a.originalName.localeCompare(b.originalName);if(v==='size')return b.size-a.size;return 0;})}
+function setView(v){curView=v;document.getElementById('filesGrid').style.display=v==='grid'?'grid':'none';document.getElementById('listView').style.display=v==='list'?'block':'none';document.getElementById('gBtn').classList.toggle('active',v==='grid');document.getElementById('lBtn').classList.toggle('active',v==='list');}
+function toggleCompact(el){el.classList.toggle('on');document.querySelector('.grid').style.gridTemplateColumns=el.classList.contains('on')?'repeat(auto-fill,minmax(110px,1fr))':'repeat(auto-fill,minmax(148px,1fr))';}
+function updStorage(used){const pct=Math.min(used/(10*1024*1024*1024)*100,100).toFixed(1);document.getElementById('sfill').style.width=(pct||2)+'%';document.getElementById('stext').innerHTML=`<b>${fmtSz(used)}</b> used`;}
+
+// PROFILE
+async function loadProfData(){
+  try{
+    const r=await fetch(`${API}/auth/me`,{headers:{'Authorization':`Bearer ${token}`}});
+    const d=await r.json();
+    if(d.success){const u=d.user;
+      document.getElementById('profName').textContent=u.name||'User';
+      document.getElementById('profEmail').textContent=u.email||'';
+      document.getElementById('profJoined').textContent='Joined: '+(u.createdAt?new Date(u.createdAt).toLocaleDateString():'N/A');
+      document.getElementById('editName').value=u.name||'';
+      document.getElementById('editEmail').value=u.email||'';
+      document.getElementById('bigAv').textContent=(u.name||'U')[0].toUpperCase();
+    }
+    const r2=await fetch(`${API}/files/stats`,{headers:{'Authorization':`Bearer ${token}`}});
+    const d2=await r2.json();
+    if(d2.success){const s=d2.stats;
+      document.getElementById('stFiles').textContent=s.totalFiles||0;
+      document.getElementById('stSize').textContent=fmtSz(s.totalSize||0);
+      document.getElementById('stImg').textContent=s.byCategory?.image||0;
+      document.getElementById('stVid').textContent=s.byCategory?.video||0;
+      document.getElementById('stAud').textContent=s.byCategory?.audio||0;
+      document.getElementById('stDoc').textContent=(s.byCategory?.doc||0)+(s.byCategory?.pdf||0);
+    }
+  }catch{}
+}
+
+async function saveProfile(){
+  const name=document.getElementById('editName').value.trim();
+  const email=document.getElementById('editEmail').value.trim();
+  const btn=document.getElementById('saveProfBtn'),sp=document.getElementById('profSpin');
+  btn.disabled=true;sp.classList.add('show');
+  try{
+    const res=await fetch(`${API}/auth/profile`,{method:'PATCH',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({name,email})});
+    const d=await res.json();
+    showAil('profAil',d.message,d.success?'success':'error');
+    if(d.success){const u={...usr,...d.user};localStorage.setItem('user',JSON.stringify(u));
+      const i=(u.name||'U')[0].toUpperCase();
+      ['avBtn','udAv','bigAv'].forEach(id=>document.getElementById(id).textContent=i);
+      document.getElementById('udName').textContent=u.name||'';}
+  }catch{showAil('profAil','Failed','error');}
+  finally{btn.disabled=false;sp.classList.remove('show');}
+}
+
+async function changePassword(){
+  const cur=document.getElementById('curPw').value,nw=document.getElementById('newPw').value,cf=document.getElementById('confPw').value;
+  if(!cur||!nw||!cf)return showAil('pwAil','All fields required','error');
+  if(nw!==cf)return showAil('pwAil','Passwords do not match','error');
+  if(nw.length<6)return showAil('pwAil','Min 6 characters','error');
+  const btn=document.getElementById('savePwBtn'),sp=document.getElementById('pwSpin');
+  btn.disabled=true;sp.classList.add('show');
+  try{
+    const res=await fetch(`${API}/auth/password`,{method:'PATCH',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({currentPassword:cur,newPassword:nw})});
+    const d=await res.json();
+    showAil('pwAil',d.message,d.success?'success':'error');
+    if(d.success){['curPw','newPw','confPw'].forEach(id=>document.getElementById(id).value='');}
+  }catch{showAil('pwAil','Failed','error');}
+  finally{btn.disabled=false;sp.classList.remove('show');}
+}
+
+function showAil(id,msg,type){const el=document.getElementById(id);el.className=`ail ${type} show`;el.innerHTML=`<i class="fas fa-${type==='success'?'check':'exclamation'}-circle"></i> ${msg}`;setTimeout(()=>el.classList.remove('show'),5000);}
+
+// SETTINGS
+async function loadSettData(){
+  try{const r=await fetch(`${API}/files/stats`,{headers:{'Authorization':`Bearer ${token}`}});const d=await r.json();
+    if(d.success){const p=Math.min((d.stats.totalSize||0)/(10*1024*1024*1024)*100,100).toFixed(1);
+      document.getElementById('sSfill').style.width=(p||2)+'%';
+      document.getElementById('sStext').textContent=`${fmtSz(d.stats.totalSize||0)} used · ${d.stats.totalFiles} files`;}}catch{}
+}
+
+async function emptyTrash(){
+  if(!confirm('Empty all trash? Cannot be undone!'))return;
+  try{const r=await fetch(`${API}/files?trash=true`,{headers:{'Authorization':`Bearer ${token}`}});const d=await r.json();
+    if(d.files){for(const f of d.files)await fetch(`${API}/files/${f._id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
+      showToast('Trash emptied!','success');loadTCnt();}}catch{showToast('Failed','error');}
+}
+
+// DROPDOWN
+function toggleDrop(){document.getElementById('udrop').classList.toggle('show')}
+document.addEventListener('click',e=>{if(!e.target.closest('#avBtn')&&!e.target.closest('#udrop'))document.getElementById('udrop').classList.remove('show');});
+function logout(){localStorage.removeItem('token');localStorage.removeItem('user');location.href='login.html';}
+
+// DRAG & DROP
+let dc=0;
+document.addEventListener('dragenter',e=>{e.preventDefault();dc++;document.getElementById('dropOv').classList.add('active')});
+document.addEventListener('dragleave',()=>{dc--;if(!dc)document.getElementById('dropOv').classList.remove('active')});
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();dc=0;document.getElementById('dropOv').classList.remove('active');if(e.dataTransfer.files.length)uploadFiles(e.dataTransfer.files);});
+
+// TOAST
+function showToast(msg,type='info'){
+  const c=document.getElementById('toasts'),t=document.createElement('div');
+  t.className=`toast ${type}`;
+  const i={success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};
+  t.innerHTML=`<i class="fas ${i[type]||i.info}"></i> ${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.cssText='opacity:0;transform:translateX(100%);transition:.3s';setTimeout(()=>t.remove(),300)},3500);
+}
+
+// UTILS
+function fmtSz(b){if(!b)return'0 B';if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';if(b<1073741824)return(b/1048576).toFixed(1)+' MB';return(b/1073741824).toFixed(2)+' GB';}
+function tAgo(d){const diff=Date.now()-new Date(d).getTime();const m=Math.floor(diff/60000),h=Math.floor(m/60),dy=Math.floor(h/24);if(m<1)return'just now';if(m<60)return`${m}m ago`;if(h<24)return`${h}h ago`;if(dy<7)return`${dy}d ago`;return new Date(d).toLocaleDateString();}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+loadFiles();
+</script>
+</body>
+</html>
