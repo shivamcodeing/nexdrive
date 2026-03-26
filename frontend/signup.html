@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NexDrive — Sign Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root{--bg:#0a0a0f;--surface:#12121a;--surface2:#1c1c2e;--accent:#6c63ff;--accent2:#ff6b9d;--accent3:#00d4aa;--text:#f0f0ff;--muted:#8888aa;--border:rgba(108,99,255,0.2)}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+    .orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.25;animation:float 8s ease-in-out infinite;pointer-events:none}
+    .orb1{width:500px;height:500px;background:#6c63ff;top:-150px;right:-100px}
+    .orb2{width:400px;height:400px;background:#ff6b9d;bottom:-100px;left:-100px;animation-delay:-4s}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-25px)}}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(108,99,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(108,99,255,.03) 1px,transparent 1px);background-size:50px 50px;pointer-events:none}
+    .card{width:480px;max-width:95vw;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:44px;box-shadow:0 0 80px rgba(108,99,255,.1),0 40px 80px rgba(0,0,0,.5);position:relative;z-index:1}
+    .logo-row{display:flex;align-items:center;gap:11px;margin-bottom:28px}
+    .logo-ic{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(108,99,255,.4)}
+    .logo-ic i{font-size:17px;color:#fff}
+    .logo-name{font-size:20px;font-weight:700}
+    .logo-name span{color:var(--accent)}
+    .tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
+    h2{font-size:25px;font-weight:700;letter-spacing:-.5px}
+    .sub{color:var(--muted);font-size:13px;margin-top:6px;margin-bottom:24px}
+    .alert{padding:11px 14px;border-radius:10px;margin-bottom:14px;font-size:13px;display:none;align-items:center;gap:8px}
+    .alert.error{background:rgba(255,70,70,.1);border:1px solid rgba(255,70,70,.3);color:#ff6b6b}
+    .alert.success{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);color:var(--accent3)}
+    .alert.show{display:flex}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .fg{margin-bottom:14px}
+    .fg label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:7px;letter-spacing:.5px;text-transform:uppercase}
+    .iw{position:relative}
+    .iw i.ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+    .iw input{width:100%;padding:12px 12px 12px 38px;background:var(--surface2);border:1px solid var(--border);border-radius:11px;color:var(--text);font-family:'Sora',sans-serif;font-size:14px;outline:none;transition:all .25s}
+    .iw input:focus{border-color:var(--accent);background:rgba(108,99,255,.05);box-shadow:0 0 0 3px rgba(108,99,255,.1)}
+    .strength{margin-top:7px;display:none}
+    .strength.show{display:block}
+    .bars{display:flex;gap:4px;margin-bottom:4px}
+    .bar{height:3px;flex:1;border-radius:2px;background:var(--surface2);transition:background .3s}
+    .bar.weak{background:#ff4444}.bar.med{background:#ffaa00}.bar.strong{background:var(--accent3)}
+    .slabel{font-size:10px;color:var(--muted)}
+    .terms{display:flex;align-items:flex-start;gap:9px;margin:16px 0;font-size:12px;color:var(--muted)}
+    .terms input{width:15px;height:15px;margin-top:1px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+    .terms a{color:var(--accent)}
+    .btn-main{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#8b7cff);border:none;border-radius:12px;color:#fff;font-family:'Sora',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .25s;box-shadow:0 8px 24px rgba(108,99,255,.35);display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-main:hover{transform:translateY(-1px)}
+    .btn-main:disabled{opacity:.7;cursor:not-allowed;transform:none}
+    .login-link{text-align:center;margin-top:18px;font-size:13px;color:var(--muted)}
+    .login-link a{color:var(--accent);font-weight:600;text-decoration:none}
+    .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;display:none}
+    .spin.show{display:block}
+    @keyframes sp{to{transform:rotate(360deg)}}
+    @media(max-width:480px){.card{padding:32px 20px}.row2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="orb orb1"></div><div class="orb orb2"></div>
+  <div class="card">
+    <div class="logo-row">
+      <div class="logo-ic"><i class="fas fa-cloud"></i></div>
+      <span class="logo-name">Nex<span>Drive</span></span>
+    </div>
+    <div class="tag">Get Started</div>
+    <h2>Create your account</h2>
+    <p class="sub">Already have one? <a href="login.html" style="color:var(--accent);font-weight:600">Sign in</a></p>
+    <div class="alert error" id="alert"><i class="fas fa-exclamation-circle"></i><span id="alertMsg"></span></div>
+    <div class="fg">
+      <label>Full Name</label>
+      <div class="iw"><i class="fas fa-user ic"></i><input type="text" id="name" placeholder="Your full name"/></div>
+    </div>
+    <div class="fg">
+      <label>Email Address</label>
+      <div class="iw"><i class="fas fa-envelope ic"></i><input type="email" id="email" placeholder="you@example.com"/></div>
+    </div>
+    <div class="row2">
+      <div class="fg" style="margin-bottom:0">
+        <label>Password</label>
+        <div class="iw"><i class="fas fa-lock ic"></i><input type="password" id="password" placeholder="Min. 6 chars" oninput="checkStrength(this.value)"/></div>
+        <div class="strength" id="sm">
+          <div class="bars"><div class="bar" id="b1"></div><div class="bar" id="b2"></div><div class="bar" id="b3"></div><div class="bar" id="b4"></div></div>
+          <span class="slabel" id="sl">Too short</span>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label>Confirm</label>
+        <div class="iw"><i class="fas fa-shield-alt ic"></i><input type="password" id="confirm" placeholder="Repeat password"/></div>
+      </div>
+    </div>
+    <div class="terms">
+      <input type="checkbox" id="terms"/>
+      <label for="terms">I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></label>
+    </div>
+    <button class="btn-main" id="signupBtn" onclick="doSignup()">
+      <span id="btnTxt">Create Account</span>
+      <div class="spin" id="spin"></div>
+      <i class="fas fa-arrow-right" id="btnArrow"></i>
+    </button>
+    <p class="login-link">Already have an account? <a href="login.html">Sign in →</a></p>
+  </div>
+  <script>
+    const API = '/api';
+
+    if(localStorage.getItem('token'))location.href='dashboard.html';
+
+    function showAlert(msg,type='error'){const el=document.getElementById('alert');document.getElementById('alertMsg').textContent=msg;el.className=`alert ${type} show`;setTimeout(()=>el.classList.remove('show'),5000);}
+    function checkStrength(v){const m=document.getElementById('sm'),lbl=document.getElementById('sl'),bars=[1,2,3,4].map(i=>document.getElementById('b'+i));m.classList.toggle('show',v.length>0);bars.forEach(b=>b.className='bar');if(v.length<6){bars[0].classList.add('weak');lbl.textContent='Too short';lbl.style.color='#ff4444';}else if(v.length<8){bars[0].classList.add('weak');bars[1].classList.add('weak');lbl.textContent='Weak';lbl.style.color='#ff4444';}else if(/[A-Z]/.test(v)&&/[0-9]/.test(v)){bars.forEach(b=>b.classList.add('strong'));lbl.textContent='Strong ✓';lbl.style.color='var(--accent3)';}else{bars[0].classList.add('med');bars[1].classList.add('med');bars[2].classList.add('med');lbl.textContent='Medium';lbl.style.color='#ffaa00';}}
+    function setLoad(v){document.getElementById('signupBtn').disabled=v;document.getElementById('spin').classList.toggle('show',v);document.getElementById('btnArrow').style.display=v?'none':'';document.getElementById('btnTxt').textContent=v?'Creating...':'Create Account';}
+
+    async function doSignup(){
+      const name=document.getElementById('name').value.trim();
+      const email=document.getElementById('email').value.trim();
+      const pass=document.getElementById('password').value;
+      const confirm=document.getElementById('confirm').value;
+      const terms=document.getElementById('terms').checked;
+      if(!name||!email||!pass||!confirm)return showAlert('Please fill in all fields.');
+      if(pass.length<6)return showAlert('Password must be at least 6 characters.');
+      if(pass!==confirm)return showAlert('Passwords do not match.');
+      if(!terms)return showAlert('Please accept the Terms of Service.');
+      setLoad(true);
+      try{
+        const r=await fetch(`${API}/auth/signup`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass})});
+        const d=await r.json();
+        if(d.success){localStorage.setItem('token',d.token);localStorage.setItem('user',JSON.stringify(d.user));showAlert('Account created!','success');setTimeout(()=>location.href='dashboard.html',900);}
+        else showAlert(d.message||'Signup failed.');
+      }catch{showAlert('Cannot connect to server.');}
+      finally{setLoad(false);}
+    }
+    document.addEventListener('keypress',e=>{if(e.key==='Enter')doSignup()});
+  </script>
+</body>
+</html>
